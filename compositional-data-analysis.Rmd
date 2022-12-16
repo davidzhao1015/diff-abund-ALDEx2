@@ -35,15 +35,11 @@ knitr::opts_chunk$set(fig.align = 'center',
 This project was built with R `r getRversion()`.
 ```{r load libraries, message=FALSE, warning=FALSE}
 
-# libraries loaded 
-# if(!requireNamespace("BiocManager", quietly = TRUE))
-#     install.packages("BiocManager")
-# BiocManager::install("Maaslin2")
-
-library(tidyverse)
 library(ALDEx2)
 library(vegan)
-library(xtable)  #make result table 
+library(xtable)  #make result table
+library(zCompositions) # replace 0 values 
+library(tidyverse)
 
 ```
 
@@ -70,14 +66,192 @@ library(xtable)  #make result table
 11. Merge all data into one object and make a data frame for result viewing and downstream analysis 
 12. Difference plot, effect size and effect plots 
 
+Steps through 1 to 8 are data exploratory while steps through 9 to 12 are differential abundance analysis by `ALDEx2` 
 
 
+## Scripts to implement above procedures 
+
+### Step 1. Download raw microbiome data and metadata  
+The microbiome OTU table and metadata was retrieved from [ML Repo] (https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html)  
+
+```{r}
+
+# raw OTU table
+raw_otu <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnbaugh/refseq/otutable.txt",
+                    header=T,
+                    sep = "")
+
+glimpse(raw_otu) 
+
+```
+Read in the metadata from URL. 
+
+```{r}
+
+# metadata 
+
+meta <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnbaugh/task-obese-lean-all.txt",
+         header = TRUE,
+         sep = "") 
+
+glimpse(meta)
+
+```
+The metadata contains `r dim(meta)[1]` samples. `Var` indicates the independent, binary variable of interest, `Lean` and `Obese`. 
 
 
+### Step 2. Preprocess input data - replace 0 values using the `zCompositions` package  
+
+Convert the raw OTU table, with samples being rows while OTU being columns. 
+```{r}
+
+t_raw_otu <- raw_otu %>% 
+  gather(key = "sample",
+         value = "reads",
+         3:ncol(.)) %>% 
+  dplyr::select(-ID) %>% 
+  spread(key = names(.)[1],
+         value = "reads") %>% 
+  column_to_rownames("sample")  # convert column to row id 
+  
+glimpse(t_raw_otu)
+
+```
 
 
+Replace 0 values using the `zCompositions` package. 
+
+Inspect whether any NA (missing values) exits; replace NA with 0 values if any. Follow the instructions introduced [here] (https://www.r-bloggers.com/2019/09/handling-missing-values-in-r-using-tidyr/). 
+
+```{r}
+
+sum(is.na(t_raw_otu)) # check number of missing values 
+
+na_t_raw_otu <- t_raw_otu %>% 
+  mutate_all(replace_na, 0) # replace NA with 0 value 
+
+sum(is.na(na_t_raw_otu)) # check number of missing values afterwards 
 
 
+```
+
+Evaluate 0/missing values patterns in the OTU table with `zPatterns()` from the `zCompositions` package. 
+```{r zPatterns}
+
+pattern.ID <- zPatterns(na_t_raw_otu, 
+          label = 0, # identify zero percentages 
+          plot=TRUE,
+          show.means = FALSE,
+          bar.ordered = c(TRUE, TRUE),
+          bar.labels = TRUE)  
+
+```
+
+
+Apply `cmultRepl()` from the `zCompositions` package to replace 0 values with the count zero multiplicative method and output counts. Error information appear and the function stops. Therefore, remove samples that are zeros for every OTU. And then implement the above function again. 
+```{r drop OTU with all zeros, collapse=TRUE} 
+
+rm_na_t_raw_otu <- na_t_raw_otu[pattern.ID != 281, ] 
+
+
+rp_rm_na_t_raw_otu <- cmultRepl(rm_na_t_raw_otu, 
+          method = "CZM",
+          output = "p-counts",  # pseudo-counts 
+          z.warning=0.8)  
+
+```
+
+
+### Step 3. Convert data to proportions  
+
+Transpose the resulting data frame to OTU X sample format. 
+
+```{r} 
+
+pcount_otu <- rp_rm_na_t_raw_otu %>% 
+  rownames_to_column("sample") %>% 
+  gather(key = "otu", value = "reads", -sample) %>% 
+  spread(key = "sample", value = "reads") %>% 
+  column_to_rownames("otu") 
+
+head(pcount_otu)
+```
+
+Calculate total pcount throughout samples. 
+```{r prop}
+
+pcount_otu %>% 
+  rownames_to_column("otu") %>% 
+  gather(key= "sample", value = "pcount", -otu) %>% 
+  group_by(sample) %>% 
+  summarise(total = sum(pcount), .groups = "drop") 
+
+```
+
+
+Calculate proportions based on pseudo counts.  
+```{r, collapse=TRUE}
+
+prop_pcount_otu <- pcount_otu %>% 
+  map_dfr(function(x) x/sum(x)) 
+
+colSums(prop_pcount_otu) == 1 # check if sum to each column equals 1 
+  
+rownames(prop_pcount_otu) <- rownames(pcount_otu)  # assign row names to the resulting data frame 
+
+```
+
+### Step 4. Perform abundance and sample filtering and deal sparsity 
+
+Filter proportional OTU data to remove all OTU that are less than 0.01% in any samples. 
+
+```{r filtering}
+
+otu_id_dropped <- prop_pcount_otu %>% 
+  rownames_to_column("otu") %>% 
+  gather(key = "sample", value="prop", -otu) %>% 
+  group_by(otu) %>%
+  summarise(max = max(prop)) %>% 
+  ungroup() %>% 
+  filter(max < 0.0001) %>% # minimal proportional threshold 0.01% 
+  pull(otu)
+  
+# remove OTU not passing 0.01% threshold 
+pcount_otu_fl <- pcount_otu %>% 
+  rownames_to_column("otu") %>% 
+  filter(!otu %in% otu_id_dropped) %>% 
+  column_to_rownames("otu")
+
+```
+
+
+### Step 5. Perform the clr data transformation
+
+The formula of `clr` is ... 
+
+```{r}
+
+# extract the descendingly ordered taxa 
+desc_otu_id <- pcount_otu_fl %>% 
+  rownames_to_column("otu") %>% 
+  gather(key = "sample", value = "pcount", -otu) %>% 
+  group_by(otu) %>% 
+  summarise(total = sum(pcount)) %>% 
+  arrange(desc(total)) %>% 
+  pull(otu)
+
+
+# re-order the pcount OTU table 
+pcount_otu_fl_desc <- pcount_otu_fl[desc_otu_id, ]
+
+
+# clr transformation 
+pcount_otu_fl_desc_clr <- t(apply(pcount_otu_fl_desc, 2, function(x) {log(x) - mean(log(x))}))  
+
+pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data frame format 
+
+
+```
 
 
 
