@@ -68,7 +68,7 @@ library(xtable)  #make result table
 9. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
 10. Estimate effect size using the function `aldex.effect()` 
 11. Merge all data into one object and make a data frame for result viewing and downstream analysis 
-12. Difference plot, effect size and effect plot
+12. Difference plot, effect size and effect plots 
 
 
 
