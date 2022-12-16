@@ -1,0 +1,97 @@
+---
+title: "Compositional analysis of microbiome data"
+author: "Xin (David) Zhao"
+date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
+knit: (function(inputFile, encoding) {
+      out_dir <- 'docs';
+      rmarkdown::render(inputFile,
+                        encoding=encoding,
+                        output_file=file.path(dirname(inputFile), out_dir, 'index.html'))})
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+    df_print: paged
+    toc: TRUE
+    toc_float: TRUE
+    collapsed: FALSE
+    number_sections: TRUE
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
+--- 
+
+```{r setup, include = FALSE}
+# set options for the entire document 
+knitr::opts_chunk$set(fig.align = 'center', 
+                      fig.dim =c(6,4), 
+                      dev="png",
+                      echo=TRUE, #display code in output document 
+                      error=FALSE,
+                      message=FALSE) #stop render when error occurs   
+```
+
+
+This project was built with R `r getRversion()`.
+```{r load libraries, message=FALSE, warning=FALSE}
+
+# libraries loaded 
+# if(!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# BiocManager::install("Maaslin2")
+
+library(tidyverse)
+library(ALDEx2)
+library(vegan)
+library(xtable)  #make result table 
+
+```
+
+## Introduction 
+- Compositional data 
+- Aitchison simplex 
+- A family of log-ratio transformation 
+- How to deal zeros in compositional data analysis
+- Statistical tools for compositional data analysis
+
+
+
+## Outline of steps to compare between groups using ALDEx2 package 
+1. Download raw microbiome data and metadata 
+2. Preprocess input data - replace 0 values using the `zCompositions` package 
+3. Convert data to proportions 
+4. Perform abundance and sample filtering and deal sparsity 
+5. Perform the `clr` data transform 
+6. Perform the singular value decomposition using the function `prcomp()` 
+7. Display the results of PCoA by using `biplot()` or `coloredBiplot()` 
+8. Visualization for exploratory data analysis 
+9. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
+10. Estimate effect size using the function `aldex.effect()` 
+11. Merge all data into one object and make a data frame for result viewing and downstream analysis 
+12. Difference plot, effect size and effect plot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
