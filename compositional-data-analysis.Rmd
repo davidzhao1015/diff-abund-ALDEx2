@@ -39,6 +39,7 @@ library(ALDEx2)
 library(vegan)
 library(xtable)  #make result table
 library(zCompositions) # replace 0 values 
+library(compositions) 
 library(tidyverse)
 
 ```
@@ -253,9 +254,114 @@ pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data 
 
 ```
 
+### Step 6. Perform the singular value decomposition using the fucntion prcomp() 
+
+Conduct principal component analysis on the compositional data set using `prcomp()` 
+
+```{r pca}
+
+pca_clr <- prcomp(pcount_otu_fl_desc_clr) 
+
+summary(pca_clr) 
+
+```
 
 
 
+### Step 7. Display the results of PCA by ggplot2 
+
+```{r PCA plot} 
+
+# extract PC1-2 for all samples 
+pc2 <- data.frame(pca_clr$x[,1:2]) 
+
+# merge metadata 
+pc2_meta <- pc2 %>% 
+  rownames_to_column("sample") %>% 
+  inner_join(meta, by = c("sample" = "X.SampleID")) %>% 
+  rename(is_obese = Var) %>% 
+  mutate(is_obese = factor(is_obese, levels = c("Obese", "Lean"))) %>% 
+  select(-ControlVar)
+
+
+# plotting with ggplot2 
+ggplot(pc2_meta, aes(x=PC1, y=PC2, color=is_obese, fill=is_obese))+
+  geom_point(alpha = 0.5) +
+  theme_classic()
+
+
+```
+
+
+### Compositional scree plot 
+Use scree plot to display the proportion of the total variation in the data set that is explained by each of the components in a principal component analysis. Create the scree plot using `screeplot()` function. 
+
+```{r scree plot}
+
+layout(matrix(c(1,2), 1, 2, byrow = T),
+       widths = c(6,4),
+       heights = c(6,4))
+par(mgp = c(2,0.5,0))
+screeplot(pca_clr, type = "line", main = "Scree plot") 
+screeplot(pca_clr, type = "barplot", main = "Scree plot") 
+
+
+```
+
+### Compositional cluster dendrogram 
+
+Conduct a cluster analysis and plot cluster dendrogram on the log-ratio-transformed data. Use Euclidian distance because the Aitchison transformed data are linearly related, but all distances should be calculated from the ratios. 
+
+```{r}
+
+# calculate distance matrix 
+dist <- dist(pcount_otu_fl_desc_clr, method = "euclidian") 
+
+
+# cluster the data 
+hc <- hclust(dist, method = "ward.D2") 
+
+hc 
+
+
+# plot the dendrogram 
+plot(hc, cex=1.0)
+
+
+```
+
+
+
+### Compositional barplot 
+
+```{r}
+
+# reorder according to clustering structure 
+pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc$order]
+
+
+
+# bar plot 
+re_order_acomp <- acomp(t(pcount_otu_fl_reorder))
+par(mfrow = c(1,2)) 
+colors <- rainbow(10)
+
+barplot(re_order_acomp, legend.text = F, col=colors,
+        axisnames=F,
+        border=NA,
+        xpd = T)
+plot(1,2, pch = 1, lty=1, ylim=c(-10, 10),
+     type= "n", axes = FALSE, ann=FALSE) 
+
+legend(x = "center", 
+       legend = desc_otu_id,
+       col = colors,
+       lwd = 5,
+       cex = .6,
+       border = NULL)
+
+
+```
 
 
 
