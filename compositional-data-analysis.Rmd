@@ -21,16 +21,23 @@ output:
     fig_caption: TRUE
 --- 
 
+<!DOCTYPE html>
 <html>
-<body>
-
-<h1 style="color:blue;">A Blue Heading</h1>
-
-<p style="color:red;">A red paragraph.</p>
-
-</body>
+<head>
+<style>
+h1{
+ color: blue;
+ font-family: verdana;
+ font-size: 300%
+}
+p {
+ color: red;
+ font-family: courier;
+ font-size: 160%;
+}
+</style>
+</head>
 </html>
-
 ```
 
 ```{r setup, include = FALSE}
