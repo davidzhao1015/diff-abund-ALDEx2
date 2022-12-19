@@ -20,6 +20,7 @@ output:
     fig_height: 6
     fig_caption: TRUE
 --- 
+# HTML CSS - ref: https://www.w3schools.com/html/html_css.asp 
 
 <html>
 <head>
