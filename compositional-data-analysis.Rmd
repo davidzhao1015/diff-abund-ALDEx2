@@ -21,6 +21,17 @@ output:
     fig_caption: TRUE
 --- 
 
+```{css, echo =FALSE}
+
+p{
+ font-size: 32px;
+}
+
+```
+
+
+
+
 ```{r setup, include = FALSE}
 # set options for the entire document 
 knitr::opts_chunk$set(fig.align = 'center', 
