@@ -9,7 +9,7 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))})
 output:
   html_document:
-    theme: cosmo
+    # theme: cosmo
     highlight: pygments
     df_print: paged
     toc: TRUE
@@ -21,23 +21,32 @@ output:
     fig_caption: TRUE
 --- 
 
-<!DOCTYPE html>
 <html>
 <head>
 <style>
+
 h1{
- color: blue;
- font-family: verdana;
- font-size: 300%
+ color: black;
+ font-family: helvetica;
+ font-size: 200%
 }
+
+h2{
+ color: #333333;  
+ font-family: helvetica;
+ font-size: 120%; 
+}
+
 p {
- color: red;
- font-family: courier;
- font-size: 160%;
+ color: #333333;
+ font-family: helvetica;
+ font-size: 100%;
 }
+
 </style>
 </head>
 </html>
+
 ```
 
 ```{r setup, include = FALSE}
@@ -64,6 +73,7 @@ library(tidyverse)
 ```
 
 ## Introduction 
+
 - Compositional data 
 - Aitchison simplex 
 - A family of log-ratio transformation 
@@ -71,8 +81,8 @@ library(tidyverse)
 - Statistical tools for compositional data analysis
 
 
-
 ## Outline of steps to compare between groups using ALDEx2 package 
+
 1. Download raw microbiome data and metadata 
 2. Preprocess input data - replace 0 values using the `zCompositions` package 
 3. Convert data to proportions 
@@ -92,6 +102,7 @@ Steps through 1 to 8 are data exploratory while steps through 9 to 12 are differ
 ## Scripts to implement above procedures 
 
 ### Step 1. Download raw microbiome data and metadata  
+
 The microbiome OTU table and metadata was retrieved from [ML Repo] (https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html)  
 
 ```{r}
@@ -100,8 +111,6 @@ The microbiome OTU table and metadata was retrieved from [ML Repo] (https://knig
 raw_otu <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnbaugh/refseq/otutable.txt",
                     header=T,
                     sep = "")
-
-glimpse(raw_otu) 
 
 ```
 Read in the metadata from URL. 
