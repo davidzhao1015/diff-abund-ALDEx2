@@ -26,12 +26,19 @@ output:
 <style>
 
 h1{
- color: black;
+ color: blue;
  font-family: helvetica;
  font-size: 200%
 }
 
+
 h2{
+ color: red;
+ font-family: helvetica;
+ font-size: 125%
+}
+
+h3{
  color: #333333;  
  font-family: helvetica;
  font-size: 120%; 
@@ -40,7 +47,7 @@ h2{
 p {
  color: #333333;
  font-family: helvetica;
- font-size: 100%;
+ font-size: 110%;
 }
 
 </style>
@@ -60,8 +67,9 @@ knitr::opts_chunk$set(fig.align = 'center',
 ```
 
 
-This project was built with R `r getRversion()`.
-```{r load libraries, message=FALSE, warning=FALSE}
+This project was built with R `r getRversion()` 
+
+```{r libraries, message=FALSE, warning=FALSE}
 
 library(ALDEx2)
 library(vegan)
