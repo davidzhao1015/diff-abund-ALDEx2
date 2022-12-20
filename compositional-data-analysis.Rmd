@@ -47,7 +47,7 @@ h3{
 p {
  color: #333333;
  font-family: helvetica;
- font-size: 115%;
+ font-size: 100%;
 }
 
 </style>
