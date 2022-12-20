@@ -19,10 +19,17 @@ output:
     fig_width: 7
     fig_height: 6
     fig_caption: TRUE
---- 
+editor_options: 
+  markdown: 
+    wrap: 72
+bibliography: references.bib
+---
 
 <html>
+
 <head>
+
+```{=html}
 <style>
 
 h1{
@@ -51,9 +58,10 @@ p {
 }
 
 </style>
+```
 </head>
-</html>
 
+</html>
 
 ```{r setup, include = FALSE}
 # set options for the entire document 
@@ -64,7 +72,6 @@ knitr::opts_chunk$set(fig.align = 'center',
                       error=FALSE,
                       message=FALSE) #stop render when error occurs   
 ```
-
 
 ```{r libraries, message=FALSE, warning=FALSE}
 
@@ -79,37 +86,81 @@ library(tidyverse)
 
 ```
 
-## Introduction 
+## Introduction
 
-- Compositional data 
-- Aitchison simplex 
-- A family of log-ratio transformation 
-- How to deal zeros in compositional data analysis
-- Statistical tools for compositional data analysis
+**Compositional data** exists as the proportions, or fractions, of a
+whole or portions of a total, conveying exclusively relative
+information, and have the properties: the elements of composition are
+non-negative and sum to unity.[@xia2018] Mathematically, compositional
+data is represented by points on a simplex (i.e., **Aitchison
+simplex**). Measurements involving probabilities, proportions,
+percentages, and ppm (10^6^, parts per million), ppb (10^9^, parts per
+billion)([Wikipedia](https://en.wikipedia.org/wiki/Compositional_data)).
+
+Composition data violate the assumptions of all standard statistical
+tests because [@xia2018]:
+
+-   spurious correlations preclude correlation analysis
+-   graphical distortions make the visualizing tools impossible (e.g.,
+    scatter plot; QQ plot et al.)
+-   lack of multivariate normality of compositions prevents multivariate
+    parametric modeling of compositional data
+-   dependence of the mixture makes ANOVA and linear regression
+    meaningless
+
+One critical progress in compositional data analysis since the 1980s to
+use the **log-ratio transformations**.The book, "Statistical Analysis of
+Microbiome Data with R" [@xia2018] provides a list for a family of
+**log-ratio transformations** popular in microbiome studies as follows, 
+
+-   Additive Log-ratio (alr) transformation
+-   Centered Log-ratio (clr) transformation
+-   Isometric Log-ratio (ilr) transformation
+
+The difference among these three log-ratio transformations is to choose
+the **divisor**. In other words, it to choose which value to be used to
+normalize all the values in a sample. Each transformation has its own
+weakness or advantages [@xia2018].
+
+Note that log and log-ratio transformations require non-zero elements in
+the data matrix. As a result, compositional data analysis must be
+preceded by **a treatment of the zeros**. Three sources of zeros in
+microbiome data includes: 
+
+-   Rounded zeros
+-   Sampling zeros
+-   Structural zeros
 
 
-## Outline of steps to compare between groups using ALDEx2 package 
+## Outline of steps to compare between groups using ALDEx2 package
 
-1. Download raw microbiome data and metadata 
-2. Preprocess input data - replace 0 values using the `zCompositions` package 
-3. Convert data to proportions 
-4. Perform abundance and sample filtering and deal sparsity 
-5. Perform the `clr` data transform 
-6. Perform the singular value decomposition using the function `prcomp()` 
-7. Display the results of PCoA by using `biplot()` or `coloredBiplot()` 
-8. Visualization for exploratory data analysis 
-9. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
-10. Estimate effect size using the function `aldex.effect()` 
-11. Merge all data into one object and make a data frame for result viewing and downstream analysis 
-12. Difference plot, effect size and effect plots 
+1.  Download raw microbiome data and metadata
+2.  Preprocess input data - replace 0 values using the `zCompositions`
+    package
+3.  Convert data to proportions
+4.  Perform abundance and sample filtering and deal sparsity
+5.  Perform the `clr` data transform
+6.  Perform the singular value decomposition using the function
+    `prcomp()`
+7.  Display the results of PCoA by using `biplot()` or `coloredBiplot()`
+8.  Visualization for exploratory data analysis
+9.  Perform the Welch's t and Wilcoxon Rank Sum Test using
+    `aldex.ttest()`
+10. Estimate effect size using the function `aldex.effect()`
+11. Merge all data into one object and make a data frame for result
+    viewing and downstream analysis
+12. Difference plot, effect size and effect plots
 
-Steps through 1 to 8 are data exploratory while steps through 9 to 12 are differential abundance analysis by `ALDEx2` 
+Steps through 1 to 8 are data exploratory while steps through 9 to 12
+are differential abundance analysis by `ALDEx2`
 
-## Scripts to implement above procedures 
 
-### Step 1. Download raw microbiome data and metadata  
+## Scripts to implement above procedures
 
-The microbiome OTU table and metadata was retrieved from [ML Repo] (https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html)  
+### Step 1. Download raw microbiome data and metadata
+
+The microbiome OTU table and metadata was retrieved from [ML Repo]
+(<https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html>)
 
 ```{r}
 
@@ -119,7 +170,8 @@ raw_otu <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnba
                     sep = "")
 
 ```
-Read in the metadata from URL. 
+
+Read in the metadata from URL.
 
 ```{r}
 
@@ -130,12 +182,15 @@ meta <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnbaugh
          sep = "") 
 
 ```
-The metadata contains `r dim(meta)[1]` samples. `Var` indicates the independent, binary variable of interest, `Lean` and `Obese`. 
 
+The metadata contains `r dim(meta)[1]` samples. `Var` indicates the
+independent, binary variable of interest, `Lean` and `Obese`.
 
-### Step 2. Preprocess input data - replace 0 values using the `zCompositions` package  
+### Step 2. Preprocess input data - replace 0 values using the `zCompositions` package
 
-Convert the raw OTU table, with samples being rows while OTU being columns. 
+Convert the raw OTU table, with samples being rows while OTU being
+columns.
+
 ```{r}
 
 t_raw_otu <- raw_otu %>% 
@@ -150,10 +205,11 @@ t_raw_otu <- raw_otu %>%
 
 ```
 
+Replace 0 values using the `zCompositions` package.
 
-Replace 0 values using the `zCompositions` package. 
-
-Inspect whether any NA (missing values) exits; replace NA with 0 values if any. Follow the instructions introduced [here] (https://www.r-bloggers.com/2019/09/handling-missing-values-in-r-using-tidyr/). 
+Inspect whether any NA (missing values) exits; replace NA with 0 values
+if any. Follow the instructions introduced [here]
+(<https://www.r-bloggers.com/2019/09/handling-missing-values-in-r-using-tidyr/>).
 
 ```{r}
 
@@ -167,7 +223,9 @@ sum(is.na(na_t_raw_otu)) # check number of missing values afterwards
 
 ```
 
-Evaluate 0/missing values patterns in the OTU table with `zPatterns()` from the `zCompositions` package. 
+Evaluate 0/missing values patterns in the OTU table with `zPatterns()`
+from the `zCompositions` package.
+
 ```{r zPatterns, results='hide'}
 
 pattern.ID <- zPatterns(na_t_raw_otu, 
@@ -179,9 +237,13 @@ pattern.ID <- zPatterns(na_t_raw_otu,
 
 ```
 
+Apply `cmultRepl()` from the `zCompositions` package to replace 0 values
+with the count zero multiplicative method and output counts. Error
+information appear and the function stops. Therefore, remove samples
+that are zeros for every OTU. And then implement the above function
+again.
 
-Apply `cmultRepl()` from the `zCompositions` package to replace 0 values with the count zero multiplicative method and output counts. Error information appear and the function stops. Therefore, remove samples that are zeros for every OTU. And then implement the above function again. 
-```{r drop OTU with all zeros, collapse=TRUE} 
+```{r drop OTU with all zeros, collapse=TRUE}
 
 rm_na_t_raw_otu <- na_t_raw_otu[pattern.ID != 281, ] 
 
@@ -193,12 +255,11 @@ rp_rm_na_t_raw_otu <- cmultRepl(rm_na_t_raw_otu,
 
 ```
 
+### Step 3. Convert data to proportions
 
-### Step 3. Convert data to proportions  
+Transpose the resulting data frame to OTU X sample format.
 
-Transpose the resulting data frame to OTU X sample format. 
-
-```{r} 
+```{r}
 
 pcount_otu <- rp_rm_na_t_raw_otu %>% 
   rownames_to_column("sample") %>% 
@@ -209,7 +270,8 @@ pcount_otu <- rp_rm_na_t_raw_otu %>%
 head(pcount_otu)
 ```
 
-Calculate total pcount throughout samples. 
+Calculate total pcount throughout samples.
+
 ```{r prop}
 
 pcount_otu %>% 
@@ -220,8 +282,8 @@ pcount_otu %>%
 
 ```
 
+Calculate proportions based on pseudo counts.
 
-Calculate proportions based on pseudo counts.  
 ```{r, collapse=TRUE}
 
 prop_pcount_otu <- pcount_otu %>% 
@@ -231,9 +293,10 @@ rownames(prop_pcount_otu) <- rownames(pcount_otu)  # assign row names to the res
 
 ```
 
-### Step 4. Perform abundance and sample filtering and deal sparsity 
+### Step 4. Perform abundance and sample filtering and deal sparsity
 
-Filter proportional OTU data to remove all OTU that are less than 0.01% in any samples. 
+Filter proportional OTU data to remove all OTU that are less than 0.01%
+in any samples.
 
 ```{r filtering}
 
@@ -254,10 +317,9 @@ pcount_otu_fl <- pcount_otu %>%
 
 ```
 
-
 ### Step 5. Perform the clr data transformation
 
-The formula of `clr` is ... 
+The formula of `clr` is ...
 
 ```{r}
 
@@ -283,9 +345,10 @@ pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data 
 
 ```
 
-### Step 6. Perform the singular value decomposition using the fucntion prcomp() 
+### Step 6. Perform the singular value decomposition using the fucntion prcomp()
 
-Conduct principal component analysis on the compositional data set using `prcomp()` 
+Conduct principal component analysis on the compositional data set using
+`prcomp()`
 
 ```{r pca, results='hide'}
 
@@ -295,11 +358,9 @@ summary(pca_clr)
 
 ```
 
+### Step 7. Display the results of PCA by ggplot2
 
-
-### Step 7. Display the results of PCA by ggplot2 
-
-```{r PCA plot} 
+```{r PCA plot}
 
 # extract PC1-2 for all samples 
 pc2 <- data.frame(pca_clr$x[,1:2]) 
@@ -321,9 +382,11 @@ ggplot(pc2_meta, aes(x=PC1, y=PC2, color=is_obese, fill=is_obese))+
 
 ```
 
+### Step 8. Compositional scree plot
 
-### Step 8. Compositional scree plot 
-Use scree plot to display the proportion of the total variation in the data set that is explained by each of the components in a principal component analysis. Create the scree plot using `screeplot()` function. 
+Use scree plot to display the proportion of the total variation in the
+data set that is explained by each of the components in a principal
+component analysis. Create the scree plot using `screeplot()` function.
 
 ```{r scree plot}
 
@@ -337,9 +400,12 @@ screeplot(pca_clr, type = "barplot", main = "Scree plot")
 
 ```
 
-### Step 9. Compositional cluster dendrogram 
+### Step 9. Compositional cluster dendrogram
 
-Conduct a cluster analysis and plot cluster dendrogram on the log-ratio-transformed data. Use Euclidian distance because the Aitchison transformed data are linearly related, but all distances should be calculated from the ratios. 
+Conduct a cluster analysis and plot cluster dendrogram on the
+log-ratio-transformed data. Use Euclidian distance because the Aitchison
+transformed data are linearly related, but all distances should be
+calculated from the ratios.
 
 ```{r}
 
@@ -359,9 +425,7 @@ plot(hc, cex=1.0)
 
 ```
 
-
-
-### Step 10. Compositional barplot 
+### Step 10. Compositional barplot
 
 ```{r}
 
@@ -392,10 +456,10 @@ legend(x = "center",
 
 ```
 
+### Step 11. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()`
 
-### Step 11. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
+ALDEx2 needs the input data with taxa by samples formats.
 
-ALDEx2 needs the input data with taxa by samples formats. 
 ```{r input aldex2, results='hide'}
 
 # metadata 
@@ -434,9 +498,13 @@ aldex_raw_count <- na_t_raw_otu3
 
 ```
 
-Generate instances of the centered log-ratio transformed values using the function `aldex.clr()`  
+Generate instances of the centered log-ratio transformed values using
+the function `aldex.clr()`
 
-The function `aldex.clr()` has three input: count table, number of Monte-Carlo instances, and level of verbosity (TRUE or FALSE). The package authors recommend 128 or more `mc.samples` for the t-test, 1000 for a rigorous effect size calculation, and at least 16 for ANOVA. 
+The function `aldex.clr()` has three input: count table, number of
+Monte-Carlo instances, and level of verbosity (TRUE or FALSE). The
+package authors recommend 128 or more `mc.samples` for the t-test, 1000
+for a rigorous effect size calculation, and at least 16 for ANOVA.
 
 ```{r aldex clr}
 
@@ -449,11 +517,16 @@ vdr <- aldex.clr(aldex_raw_count,
 
 Perform the Welch's and Wilcoxon rank sum test using `aldex.ttest()`
 
-The function `aldex.ttest()` returns the values of `we.ep` (expected p-value of Welch's t test), `we.eBH` (expected Benjamini-Hochberg corrected p-value of Welch's t test), `wi.ep` (expected p-value of Wilcoxon rank sum test), and `wi.eBH` (expected Benjamini-Hochberg corrected p-value of Wilcoxon rank sum test)
+The function `aldex.ttest()` returns the values of `we.ep` (expected
+p-value of Welch's t test), `we.eBH` (expected Benjamini-Hochberg
+corrected p-value of Welch's t test), `wi.ep` (expected p-value of
+Wilcoxon rank sum test), and `wi.eBH` (expected Benjamini-Hochberg
+corrected p-value of Wilcoxon rank sum test)
 
-The function, `aldex.glm()` is alternative to `aldex.ttest()` which implement Kruskal-Wallis test. However, it is slow. 
+The function, `aldex.glm()` is alternative to `aldex.ttest()` which
+implement Kruskal-Wallis test. However, it is slow.
 
-```{r} 
+```{r}
 
 vdr_t <- aldex.ttest(vdr, paired.test=FALSE, hist.plot=FALSE, verbose=FALSE)   
 
@@ -462,12 +535,12 @@ head(vdr_t)
 
 Estimate effect size using the function `aldex.effect()`
 
-The `aldex.effect()` function estimates effect size and the within and between condition values in the case of two conditions.
+The `aldex.effect()` function estimates effect size and the within and
+between condition values in the case of two conditions.
 
-It has 3 arguments: 
-- the aldex object from aldex.clr()
-- a flag indicating whether or not to include values for all samples are used as the denominator 
-- the level of verbosity 
+It has 3 arguments: - the aldex object from aldex.clr() - a flag
+indicating whether or not to include values for all samples are used as
+the denominator - the level of verbosity
 
 ```{r effect size}
 
@@ -475,17 +548,20 @@ vdr_effect <- aldex.effect(vdr, include.sample.summary = FALSE, verbose = FALSE)
 
 ```
 
-The function, `aldex.effect()` returns all values including, 
-- rab.all  median clr value for all samples inthe feature 
-- rab.win.VdrFecal  median clr value for the VdrFecal group of samples
-- rba.win.VdrCecal  median clr value for the VdrCecal groups of samples 
-- dif.btw  median difference in clr values beween VdrFecal and VdrCecal groups
-- dif.win  median of the largest difference in clr values within VdrFecal and VdrCecal groups 
-- effect  median effect size: diff.btw/max(diff.win) for all instances 
-- overlap  proportion of effect size that overlaps 0: it is overlap between the Bayesian distribuiotn of rous VdrFecal and VdrCecal 
+The function, `aldex.effect()` returns all values including, - rab.all
+median clr value for all samples inthe feature - rab.win.VdrFecal median
+clr value for the VdrFecal group of samples - rba.win.VdrCecal median
+clr value for the VdrCecal groups of samples - dif.btw median difference
+in clr values beween VdrFecal and VdrCecal groups - dif.win median of
+the largest difference in clr values within VdrFecal and VdrCecal
+groups - effect median effect size: diff.btw/max(diff.win) for all
+instances - overlap proportion of effect size that overlaps 0: it is
+overlap between the Bayesian distribuiotn of rous VdrFecal and VdrCecal
 
-Merge all outputs into one single object and make a data frame for result viewing and downstream analysis 
-```{r} 
+Merge all outputs into one single object and make a data frame for
+result viewing and downstream analysis
+
+```{r}
 
 vdr_all <- data.frame(vdr_t, vdr_effect)  
 
@@ -493,8 +569,9 @@ vdr_all <- data.frame(vdr_t, vdr_effect)
 head(vdr_all)
 ```
 
+Check any significant taxa between obese and lean conditions detected in
+both Welch's t-test and Wilcoxon rank sum tests.
 
-Check any significant taxa between obese and lean conditions detected in both Welch's t-test and Wilcoxon rank sum tests. 
 ```{r sig taxa}
 
 sig_by_both <- vdr_all %>% 
@@ -504,7 +581,9 @@ sig_by_both
 
 
 ```
-Any taxa remain significant when p-values are adjusted for multiple testing correction using BH method. 
+
+Any taxa remain significant when p-values are adjusted for multiple
+testing correction using BH method.
 
 ```{r pval sig}
 
@@ -515,11 +594,15 @@ sig_by_both_fdr
 
 ```
 
-
 ### Step 12. Bland-Altman plot (also known as "difference plot")
-The point underlying the method is that any two methods designing to measure the same property or parameter should have agree sufficiently closely, but not merely highly correlated. 
 
-ALDEX2 provides a Bland-Altman (MA) style plot to graphically compare the degree of agreement of measures between median log2 between-condition difference and median log2 relative abundance. 
+The point underlying the method is that any two methods designing to
+measure the same property or parameter should have agree sufficiently
+closely, but not merely highly correlated.
+
+ALDEX2 provides a Bland-Altman (MA) style plot to graphically compare
+the degree of agreement of measures between median log2
+between-condition difference and median log2 relative abundance.
 
 ```{r MA plot}
 
@@ -534,10 +617,12 @@ aldex.plot(vdr_all,
 
 ```
 
-Effect size and effect size plot 
-In ALDEX2, the effect size is defined as a measure of the mean ratio of the difference between groups (diff.btw) and the maximum difference within groups (diff.win or variance).
+Effect size and effect size plot In ALDEX2, the effect size is defined
+as a measure of the mean ratio of the difference between groups
+(diff.btw) and the maximum difference within groups (diff.win or
+variance).
 
-```{r} 
+```{r}
 
 par(mfrow = c(1,2)) 
 aldex.plot(vdr_all, 
@@ -560,13 +645,18 @@ aldex.plot(vdr_all,
 
 ```
 
-In general, p-value is less robust than effect size. Thus, researchers prefer to report effect size more often than the p-value. If sample size is sufficiently large, an effect size of 0.5 or greater is considered more likely corresponding to biological relevance. 
+In general, p-value is less robust than effect size. Thus, researchers
+prefer to report effect size more often than the p-value. If sample size
+is sufficiently large, an effect size of 0.5 or greater is considered
+more likely corresponding to biological relevance.
 
-In ALDEX2, an effect size cutoff of 1.5 - 2 and an overlap cutoff of 0.01 is considered as more appropriate to identify differential taxa of interest. 
+In ALDEX2, an effect size cutoff of 1.5 - 2 and an overlap cutoff of
+0.01 is considered as more appropriate to identify differential taxa of
+interest.
 
-Here, illustrate two additional plots about effect size:
-1. plot the effect size versus the p-value
-2. a volcano plot to show difference between groups versus p-values 
+Here, illustrate two additional plots about effect size: 1. plot the
+effect size versus the p-value 2. a volcano plot to show difference
+between groups versus p-values
 
 ```{r effect size plot}
 
@@ -592,9 +682,7 @@ abline(h=0.05, lty=2, lwd=3, col="red")
 
 ```
 
-
 ```{r package version info}
 # Session information 
 sessionInfo()  
 ```
-
