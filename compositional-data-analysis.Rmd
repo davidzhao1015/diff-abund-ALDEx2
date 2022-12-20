@@ -55,7 +55,6 @@ p {
 </head>
 </html>
 
-```
 
 ```{r setup, include = FALSE}
 # set options for the entire document 
