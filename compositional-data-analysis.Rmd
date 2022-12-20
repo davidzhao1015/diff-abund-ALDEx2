@@ -20,15 +20,14 @@ output:
     fig_height: 6
     fig_caption: TRUE
 --- 
-# HTML CSS - ref: https://www.w3schools.com/html/html_css.asp 
 
 <html>
 <head>
 <style>
 
 h1{
- color: #333333;
- font-family: helvetica;
+ color: #055C9D;
+ font-family: Georgia;
  font-size: 200%
 }
 
@@ -36,11 +35,11 @@ h1{
 h2{
  color: #055C9D;
  font-family: helvetica;
- font-size: 125%
+ font-size: 150%
 }
 
 h3{
- color: #333333;  
+ color: #055C9D;  
  font-family: helvetica;
  font-size: 120%; 
 }
@@ -48,7 +47,7 @@ h3{
 p {
  color: #333333;
  font-family: helvetica;
- font-size: 115%;
+ font-size: 100%;
 }
 
 </style>
