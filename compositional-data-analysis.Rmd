@@ -168,7 +168,7 @@ sum(is.na(na_t_raw_otu)) # check number of missing values afterwards
 ```
 
 Evaluate 0/missing values patterns in the OTU table with `zPatterns()` from the `zCompositions` package. 
-```{r zPatterns}
+```{r zPatterns, results='hide'}
 
 pattern.ID <- zPatterns(na_t_raw_otu, 
           label = 0, # identify zero percentages 
@@ -226,8 +226,6 @@ Calculate proportions based on pseudo counts.
 
 prop_pcount_otu <- pcount_otu %>% 
   map_dfr(function(x) x/sum(x)) 
-
-colSums(prop_pcount_otu) == 1 # check if sum to each column equals 1 
   
 rownames(prop_pcount_otu) <- rownames(pcount_otu)  # assign row names to the resulting data frame 
 
@@ -289,7 +287,7 @@ pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data 
 
 Conduct principal component analysis on the compositional data set using `prcomp()` 
 
-```{r pca}
+```{r pca, results='hide'}
 
 pca_clr <- prcomp(pcount_otu_fl_desc_clr) 
 
@@ -324,7 +322,7 @@ ggplot(pc2_meta, aes(x=PC1, y=PC2, color=is_obese, fill=is_obese))+
 ```
 
 
-### Compositional scree plot 
+### Step 8. Compositional scree plot 
 Use scree plot to display the proportion of the total variation in the data set that is explained by each of the components in a principal component analysis. Create the scree plot using `screeplot()` function. 
 
 ```{r scree plot}
@@ -339,7 +337,7 @@ screeplot(pca_clr, type = "barplot", main = "Scree plot")
 
 ```
 
-### Compositional cluster dendrogram 
+### Step 9. Compositional cluster dendrogram 
 
 Conduct a cluster analysis and plot cluster dendrogram on the log-ratio-transformed data. Use Euclidian distance because the Aitchison transformed data are linearly related, but all distances should be calculated from the ratios. 
 
@@ -363,7 +361,7 @@ plot(hc, cex=1.0)
 
 
 
-### Compositional barplot 
+### Step 10. Compositional barplot 
 
 ```{r}
 
@@ -395,10 +393,10 @@ legend(x = "center",
 ```
 
 
-### Step 9. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
+### Step 11. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()` 
 
 ALDEx2 needs the input data with taxa by samples formats. 
-```{r input aldex2}
+```{r input aldex2, results='hide'}
 
 # metadata 
 is.obese <- meta %>% 
@@ -518,7 +516,7 @@ sig_by_both_fdr
 ```
 
 
-Bland-Altman plot (also known as "difference plot")
+### Step 12. Bland-Altman plot (also known as "difference plot")
 The point underlying the method is that any two methods designing to measure the same property or parameter should have agree sufficiently closely, but not merely highly correlated. 
 
 ALDEX2 provides a Bland-Altman (MA) style plot to graphically compare the degree of agreement of measures between median log2 between-condition difference and median log2 relative abundance. 
@@ -595,20 +593,8 @@ abline(h=0.05, lty=2, lwd=3, col="red")
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{r package version info}
+# Session information 
+sessionInfo()  
+```
 
