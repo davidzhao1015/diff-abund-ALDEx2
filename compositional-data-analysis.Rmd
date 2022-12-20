@@ -26,7 +26,7 @@ output:
 <style>
 
 h1{
- color: #003060;
+ color: #055C9D;
  font-family: Georgia;
  font-size: 200%
 }
@@ -39,7 +39,7 @@ h2{
 }
 
 h3{
- color: #0E86D4;  
+ color: #055C9D;  
  font-family: helvetica;
  font-size: 120%; 
 }
