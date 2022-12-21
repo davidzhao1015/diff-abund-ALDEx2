@@ -205,7 +205,7 @@ meta <- read.csv(file = "https://knights-lab.github.io/MLRepo/datasets/turnbaugh
 The metadata contains `r dim(meta)[1]` samples. `Var` indicates the
 independent, binary variable of interest, `Lean` and `Obese`.
 
-### Step 2. Preprocess input data - replace 0 values using the `zCompositions` package
+### Step 2. Preprocess input data
 
 Convert the raw OTU table, with samples being rows while OTU being
 columns.
@@ -223,13 +223,11 @@ t_raw_otu <- raw_otu %>%
 
 ```
 
-Replace 0 values using the `zCompositions` package.
-
 Inspect whether any NA (missing values) exits; replace NA with 0 values
-if any. Follow the instructions introduced [here]
-(<https://www.r-bloggers.com/2019/09/handling-missing-values-in-r-using-tidyr/>).
+if any. Follow the instructions introduced
+[here](https://www.r-bloggers.com/2019/09/handling-missing-values-in-r-using-tidyr/).
 
-```{r}
+```{r, results='hide'}
 
 sum(is.na(t_raw_otu)) # check number of missing values 
 
@@ -241,25 +239,28 @@ sum(is.na(na_t_raw_otu)) # check number of missing values afterwards
 
 ```
 
-Evaluate 0/missing values patterns in the OTU table with `zPatterns()`
-from the `zCompositions` package.
+Evaluate visually 0/missing values patterns in the OTU table with
+`zPatterns()` from the `zCompositions` package.
 
 ```{r zPatterns, results='hide'}
 
 pattern.ID <- zPatterns(na_t_raw_otu, 
           label = 0, # identify zero percentages 
+          axis.labels = c("Taxa", "Sample ID"),
           plot=TRUE,
           show.means = FALSE,
           bar.ordered = c(TRUE, TRUE),
-          bar.labels = TRUE)  
+          bar.labels = FALSE,
+          suppress.print = TRUE)  
 
 ```
 
 Apply `cmultRepl()` from the `zCompositions` package to replace 0 values
-with the count zero multiplicative method and output counts. Error
-information appear and the function stops. Therefore, remove samples
-that are zeros for every OTU. And then implement the above function
-again.
+with the count zero multiplicative method and output counts. 
+
+Error information, however, appear and the function stops. Therefore,
+remove samples that are zeros for every OTU. And then implement the
+above function again.
 
 ```{r drop OTU with all zeros, collapse=TRUE}
 
@@ -267,7 +268,7 @@ rm_na_t_raw_otu <- na_t_raw_otu[pattern.ID != 281, ]
 
 
 rp_rm_na_t_raw_otu <- cmultRepl(rm_na_t_raw_otu, 
-          method = "CZM",
+          method = "CZM", # count zero multiplicative method 
           output = "p-counts",  # pseudo-counts 
           z.warning=0.8)  
 
@@ -311,7 +312,7 @@ rownames(prop_pcount_otu) <- rownames(pcount_otu)  # assign row names to the res
 
 ```
 
-### Step 4. Perform abundance and sample filtering and deal sparsity
+### Step 4. Filter rare taxa
 
 Filter proportional OTU data to remove all OTU that are less than 0.01%
 in any samples.
@@ -335,9 +336,7 @@ pcount_otu_fl <- pcount_otu %>%
 
 ```
 
-### Step 5. Perform the clr data transformation
-
-The formula of `clr` is ...
+### Step 5. Perform the clr transformation
 
 ```{r}
 
@@ -363,7 +362,7 @@ pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data 
 
 ```
 
-### Step 6. Perform the singular value decomposition using the fucntion prcomp()
+### Step 6. Perform the ordination analysis of clr-transformed OTU data
 
 Conduct principal component analysis on the compositional data set using
 `prcomp()`
@@ -391,12 +390,31 @@ pc2_meta <- pc2 %>%
   mutate(is_obese = factor(is_obese, levels = c("Obese", "Lean"))) %>% 
   select(-ControlVar)
 
+```
+
+Produce PCA plot with `ggplot2` package.
+
+```{r ggplot PCA, fig.height=6, fig.width=8}
 
 # plotting with ggplot2 
-ggplot(pc2_meta, aes(x=PC1, y=PC2, color=is_obese, fill=is_obese))+
-  geom_point(alpha = 0.5) +
-  theme_classic()
-
+ggplot(pc2_meta, aes(x=PC1, 
+                     y=PC2, 
+                     color=is_obese))+
+  geom_point(alpha = 0.7, 
+             size=3) +
+  stat_ellipse()+ # add ellipses 
+  scale_color_manual(values = c("#0000FF", "#ED003E"),
+                     name = "Experimental\nCondition",  # change text of legend title 
+                     labels = c("obese", "lean")) + # change text of legend labels 
+  scale_y_continuous(limits = c(-25, 25)) +  # change the y-axis ranges 
+  scale_x_continuous(limits = c(-25, 25)) +  # change the x-axis ranges 
+  labs(title = "Principal Component Analysis of clr-transformed OTU matrix",
+       subtitle = "Effect of obesity on gut microbiome compositions",
+       caption = "The PCA was conducated upon clr-transformed OTU matrix.") + 
+  theme(panel.background = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1),
+        plot.caption = element_text(hjust = 0))
+  
 
 ```
 
