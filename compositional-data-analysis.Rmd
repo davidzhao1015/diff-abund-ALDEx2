@@ -144,31 +144,30 @@ graph[layout = dot,
 
 node[shape = box,
      fixedsize = true,
-     width = 9,
-     height = 4,
+     width = 20,
+     height = 7,
      color = RoyalBlue]
     
 a [label = 'Load\nData',
-   fontsize = 90]
+  fontsize = 180]
 b [label = 'Treat\nZeroness',
-fontsize = 90]
+  fontsize = 180]
 c [label = 'ConvertDatato\nProportions',
-fontsize = 90]
+  fontsize = 180]
 d [label = 'Filter\nData',
-fontsize = 90]
+  fontsize = 180]
 e [label = 'clr\nTransformation',
-fontsize = 90]
+  fontsize = 180]
 f [label = 'PCA',
-fontsize = 90]
+  fontsize = 180]
 g [label = 'Display\nPCA',
-fontsize = 90]
+  fontsize = 180]
 h [label = 'Welchs\nttest',
-fontsize = 90]
+  fontsize = 180]
 i [label = 'Estimate\nEffectSize',
-fontsize = 90]
+  fontsize = 180]
 j [label = 'Difference\nPlot',
-fontsize = 90]
-
+  fontsize = 180]
 
 a -> b -> c -> d -> e -> f -> g -> h -> i -> j
 }")
