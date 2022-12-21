@@ -145,6 +145,7 @@ graph[layout = dot,
 node[shape = box,
      fixedsize = true,
      width = 4,
+     height = 2.5
      color = RoyalBlue]
     
 a [label = 'Load\nData']
@@ -168,7 +169,8 @@ a -> b -> c -> d -> e -> f -> g -> h -> i -> j
 
 ### Step 1. Download raw microbiome data and metadata
 
-The microbiome OTU table and metadata was retrieved from [ML Repo](https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html)
+The microbiome OTU table and metadata was retrieved from [ML
+Repo](https://knights-lab.github.io/MLRepo/docs/turnbaugh_lean_obese_all.html)
 
 ```{r}
 
