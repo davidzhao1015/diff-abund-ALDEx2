@@ -169,7 +169,6 @@ i [label = 'Estimate\nEffectSize',
 j [label = 'Difference\nPlot',
   fontsize = 180]
 
-
 a -> b -> c -> d -> e -> f -> g -> h -> i -> j
 }")
 
