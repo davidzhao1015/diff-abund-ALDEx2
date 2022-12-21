@@ -82,6 +82,7 @@ library(vegan)
 library(zCompositions) # for zero treatment in microbiome data 
 library(compositions) 
 library(DiagrammeR) # for flow diagram 
+library(dendextend) # set parameters for plotting dendrograms  
 library(tidyverse)
 
 ```
@@ -362,7 +363,7 @@ pcount_otu_fl_desc_clr <- data.frame(pcount_otu_fl_desc_clr)  # convert to data 
 
 ```
 
-### Step 6. Perform the ordination analysis of clr-transformed OTU data
+### Step 6. Princinpal component analysis of clr-transformed OTU matrix
 
 Conduct principal component analysis on the compositional data set using
 `prcomp()`
@@ -375,7 +376,7 @@ summary(pca_clr)
 
 ```
 
-### Step 7. Display the results of PCA by ggplot2
+### Step 7. PCA plot
 
 ```{r PCA plot}
 
@@ -418,7 +419,7 @@ ggplot(pc2_meta, aes(x=PC1,
 
 ```
 
-### Step 8. Compositional scree plot
+### Step 8. Scree plot of princinpal component analysis
 
 Use [scree
 plot](https://en.wikipedia.org/wiki/Scree_plot#:~:text=In%20multivariate%20statistics%2C%20a%20scree,principal%20component%20analysis%20(PCA).)
@@ -466,39 +467,95 @@ ggplot(var_explained_df,
 
 ```
 
-A scree plot always displays the eigenvalues in a downward curve,
-ordering the eigenvalues from largest to smallest.
-
 According to the scree test, the "elbow" of the graph where the
 eigenvalues seem to level off is found and factors or components to the
 left of this point should be retained as significant.
 
-### Step 9. Compositional cluster dendrogram
+### Step 9. Hierarchical cluster analysis
 
-Conduct a cluster analysis and plot cluster dendrogram on the
-log-ratio-transformed data. Use Euclidian distance because the Aitchison
-transformed data are linearly related, but all distances should be
-calculated from the ratios.
+Hierarchical cluster analysis (e.g., principles, methods and
+implementations) is well documented in
+[GustaMe](https://sites.google.com/site/mb3gustame/dissimilarity-based-methods/cluster-analysis/hierarchical-cluster-analysis),
+and widely used in exploratory data analysis of microbiome data.
 
-```{r}
+Conduct a cluster analysis and plot cluster dendrogram on dissimilarity
+based on the `clr-transformed` OTU matrix. Use `Euclidian` distance
+because the Aitchison transformed data are linearly related, but all
+distances should be calculated from the ratios.
+
+```{r cluster dist}
 
 # calculate distance matrix 
-dist <- dist(pcount_otu_fl_desc_clr, method = "euclidian") 
-
+dist <- dist(pcount_otu_fl_desc_clr,  # input clr-transformed OTU data 
+             method = "euclidian")  # Euclidian distance 
 
 # cluster the data 
-hc <- hclust(dist, method = "ward.D2") 
+hc_ward.d2 <- hclust(dist, # dissimilarity structure as produced by dist 
+                     method = "ward.D2") # the agglomeration algorithm used 
 
-hc 
+```
+
+Draw dendrogram with the base R function and ggplot2-based function as
+alternative, following the instructions on
+[STHDA](http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning) and [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram). 
+
+```{r dendrogram base R, collapse=TRUE}
+
+# create dendrogram object 
+dend_ward.d2 <- hc_ward.d2 %>% 
+  as.dendrogram  
+
+# # get the labels of the tree/ dendrogram 
+# labels(dend_ward.d2) 
+
+# extract the grouping variable for labels 
+
+label_id <- data.frame(X.SampleID = labels(dend_ward.d2))  # extract tree labels 
+
+label_meta <- plyr::join(label_id, meta)  # full join two data sets keeping original order of tree labels 
+
+# assign node color by experimental conditions
+node_col_df <- label_meta %>% 
+  mutate(node_col = case_when(
+    Var == "Obese" ~ "blue",
+    Var == "Lean" ~ "red",
+    is.na(Var) ~ "grey"
+  )) %>% 
+  mutate(bar_code = case_when(
+    Var == "Obese" ~ 1,
+    Var == "Lean" ~ 2,
+    is.na(Var) ~ 3
+  ))
 
 
-# plot the dendrogram 
-plot(hc, cex=1.0)
+# Set the plot margin: bottom, left, top & right
+par(mar = c(10, 3, 3, 4) + 0.1,
+    xpd = NA) # allow content to go into outer margin
+
+# dendrogram plot without labels 
+dend_ward.d2 %>% 
+  set("labels", '') %>%
+  set("branches_k_color", k=3) %>% 
+  plot 
+
+# set up the color bar 
+node_col2 <- node_col_df %>% pull(node_col) 
+colored_bars(colors = node_col2, dend = dend_ward.d2, y_shift = -1)   
+
+# add legend manually
+legend("topright", legend = c('obese', 'lean', 'NA'), 
+       pch = 15, 
+       pt.cex = 1, 
+       cex = 1, 
+       bty = 'n',
+       inset = c(-0.1, 0), # place outside
+       title = "Experimental Conditions", 
+       col = c('blue', 'red', 'grey'))
 
 
 ```
 
-### Step 10. Compositional barplot
+### Step 10. Compositional bar plot
 
 ```{r}
 
