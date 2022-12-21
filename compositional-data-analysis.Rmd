@@ -144,7 +144,7 @@ graph[layout = dot,
 
 node[shape = box,
      fixedsize = true,
-     width = 1.3,
+     width = 4,
      color = RoyalBlue]
     
 a [label = 'Load\nData']
@@ -209,7 +209,6 @@ t_raw_otu <- raw_otu %>%
   spread(key = names(.)[1],
          value = "reads") %>% 
   column_to_rownames("sample")  # convert column to row id 
-
 
 ```
 
