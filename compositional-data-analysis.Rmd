@@ -144,20 +144,30 @@ graph[layout = dot,
 
 node[shape = box,
      fixedsize = true,
-     width = 4,
+     width = 6,
      height = 2.5
      color = RoyalBlue]
     
-a [label = 'Load\nData']
-b [label = 'Treat\nZeroness']
-c [label = 'ConvertDatato\nProportions']
-d [label = 'Filter\nData']
-e [label = 'clr\nTransformation']
-f [label = 'PCA']
-g [label = 'Display\nPCA']
-h [label = 'Welchs\nttest']
-i [label = 'Estimate\nEffectSize']
-j [label = 'Difference\nPlot']
+a [label = 'Load\nData',
+   fontsize = 50]
+b [label = 'Treat\nZeroness',
+fontsize = 50]
+c [label = 'ConvertDatato\nProportions',
+fontsize = 50]
+d [label = 'Filter\nData',
+fontsize = 50]
+e [label = 'clr\nTransformation',
+fontsize = 50]
+f [label = 'PCA',
+fontsize = 50]
+g [label = 'Display\nPCA',
+fontsize = 50]
+h [label = 'Welchs\nttest',
+fontsize = 50]
+i [label = 'Estimate\nEffectSize',
+fontsize = 50]
+j [label = 'Difference\nPlot',
+fontsize = 50]
 
 
 a -> b -> c -> d -> e -> f -> g -> h -> i -> j
