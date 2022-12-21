@@ -420,21 +420,58 @@ ggplot(pc2_meta, aes(x=PC1,
 
 ### Step 8. Compositional scree plot
 
-Use scree plot to display the proportion of the total variation in the
-data set that is explained by each of the components in a principal
-component analysis. Create the scree plot using `screeplot()` function.
+Use [scree
+plot](https://en.wikipedia.org/wiki/Scree_plot#:~:text=In%20multivariate%20statistics%2C%20a%20scree,principal%20component%20analysis%20(PCA).)
+to display the proportion of the total variation in the data set that is
+explained by each of the components in a principal component analysis.
+
+Create the scree plot using `ggplot2` following the online
+[instruction](https://www.statology.org/scree-plot-r/).
 
 ```{r scree plot}
 
-layout(matrix(c(1,2), 1, 2, byrow = T),
-       widths = c(6,4),
-       heights = c(6,4))
-par(mgp = c(2,0.5,0))
-screeplot(pca_clr, type = "line", main = "Scree plot") 
-screeplot(pca_clr, type = "barplot", main = "Scree plot") 
+# calculate total variance explained by each principal component 
+var_explained <- pca_clr$sdev^2 / sum(pca_clr$sdev^2)  
+
+var_explained[1:4]  # take a look at variations of four PCs 
+
+```
+
+The first principal component explains 9.0% of the total variation in
+the data set; the second principal component explains 6.4% of the total
+variation in the data set.
+
+```{r ggplot2 scree plot, collapse=TRUE}
+
+# store var_explained in the data frame 
+var_explained_df <- data.frame(PC = c(1:10),
+                               var_exp = var_explained[1:10])  
+
+
+ggplot(var_explained_df, 
+       aes(x= PC, 
+           y= var_exp)) +
+  geom_point() +
+  geom_line() +
+  xlab("Principal Component") +
+  ylab("Variance Explained") +
+  scale_x_discrete(limits = c(1:10)) + 
+  scale_y_continuous(limits = c(0.01, 0.1),
+                     labels = scales::percent)+ 
+  geom_vline(xintercept = 4, color = "red", linetype = "dashed")+
+  ggtitle("Scree Plot") +
+  theme(panel.background = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1))
 
 
 ```
+
+A scree plot always displays the eigenvalues in a downward curve,
+ordering the eigenvalues from largest to smallest.
+
+According to the scree test, the "elbow" of the graph where the
+eigenvalues seem to level off is found and factors or components to the
+left of this point should be retained as significant.
 
 ### Step 9. Compositional cluster dendrogram
 
