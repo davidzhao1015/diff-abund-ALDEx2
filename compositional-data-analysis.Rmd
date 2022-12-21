@@ -499,7 +499,7 @@ Draw dendrogram with the base R function and ggplot2-based function as
 alternative, following the instructions on
 [STHDA](http://www.sthda.com/english/wiki/beautiful-dendrogram-visualizations-in-r-5-must-known-methods-unsupervised-machine-learning) and [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram). 
 
-```{r dendrogram base R, collapse=TRUE}
+```{r dendrogram base R, collapse=TRUE, fig.height=8, fig.width=16}
 
 # create dendrogram object 
 dend_ward.d2 <- hc_ward.d2 %>% 
@@ -582,7 +582,6 @@ legend(x = "center",
        lwd = 5,
        cex = .6,
        border = NULL)
-
 
 ```
 
