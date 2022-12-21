@@ -560,7 +560,7 @@ legend("topright", legend = c('obese', 'lean', 'NA'),
 ```{r}
 
 # reorder according to clustering structure 
-pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc$order]
+pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc_ward.d2$order]
 
 
 
