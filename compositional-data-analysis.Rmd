@@ -82,7 +82,9 @@ library(vegan)
 library(zCompositions) # for zero treatment in microbiome data 
 library(compositions) 
 library(DiagrammeR) # for flow diagram 
-library(dendextend) # set parameters for plotting dendrograms  
+library(dendextend) # set parameters for plotting dendrograms 
+library(scales)
+library(RColorBrewer)
 library(tidyverse)
 
 ```
@@ -501,7 +503,6 @@ alternative, following the instructions on
 and
 [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram).
 
-
 ```{r dendrogram base R, collapse=TRUE, fig.dim=c(8,6)}
 
 # create dendrogram object 
@@ -558,32 +559,95 @@ legend("topright", legend = c('obese', 'lean', 'NA'),
 
 ```
 
-### Step 10. Compositional bar plot
+### Step 10. Bar plot of microbiota composition
+
+Use Aitchison composition, `acomp()` function to analyze compositions in
+the philosophical framework of the Aitchison Simplex. The input to
+`acomp()` is absolute count (read) data in the sample X taxa format. The
+output of `acomp()` represents one closed composition or a matrix of
+class `acomp` represents multiple closed compositions each in one row.
+
+The website,
+[rdocumentation](https://www.rdocumentation.org/packages/compositions/versions/2.0-4/topics/acomp)
+provides a code example of running `acomp()` function.
 
 ```{r}
 # reorder according to clustering structure 
-pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc_ward.d2$order]
+pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc_ward.d2$order]  # the input data is OTU count data after 0 replacement
 
 
-# bar plot 
-re_order_acomp <- acomp(t(pcount_otu_fl_reorder))
-par(mfrow = c(1,2)) 
-colors <- rainbow(10)
+# create acomp vector  
+re_order_acomp <- acomp(t(pcount_otu_fl_reorder))  # row sum of acomp output is 1 
 
-barplot(re_order_acomp, legend.text = F, col=colors,
-        axisnames=F,
-        border=NA,
-        xpd = T)
-plot(1,2, pch = 1, lty=1, ylim=c(-10, 10),
-     type= "n", axes = FALSE, ann=FALSE) 
 
-legend(x = "center", 
-       legend = desc_otu_id,
-       col = colors,
-       lwd = 5,
-       cex = .6,
-       border = NULL)
 
+# display top 11 taxa based on mean relative abundance; while combining all other taxa as a single group 'others'  
+re_order_acomp_df <- data.frame(re_order_acomp) 
+
+# top11 taxa 
+top11_taxa <- re_order_acomp_df %>% 
+  rownames_to_column("sample") %>% 
+  gather(key = "otu", value = "rel_abund", -sample) %>% 
+  group_by(otu) %>% 
+  summarise(total = sum(rel_abund)) %>% 
+  arrange(desc(total)) %>% 
+  head(11) %>%
+  pull(otu)
+
+rel.abund_regroup <- re_order_acomp_df %>% 
+  rownames_to_column("sample") %>% 
+  gather(key = "otu", value = "rel_abund", -sample) %>% 
+  mutate(otu2 = case_when(
+    otu %in% top11_taxa ~ otu,
+    !otu %in% top11_taxa ~ "others"
+  )) %>% 
+  group_by(sample, otu2) %>% 
+  summarise(rel_abund2 = sum(rel_abund)) 
+
+
+# create the bar plot using ggplot2 
+
+top11_taxa_shorten <- c("Faecalibacterium_prausnitzii_strain_ATCC_27768",
+                        "Bacteroides_vulgatus_strain_JCM_5826",
+                        "Eubacterium_rectale_strain_ATCC_33656",
+                        "Blautia_luti_strain_DSM_14534",
+                        "Ruminococcus_faecis_strain_Eg2",
+                        "Subdoligranulum_variabile_strain_BI_114",
+                        "Prevotella_copri_strain_CB7",
+                        "Bacteroides_uniformis_strain_JCM_5828",
+                        "Blautia_wexlerae_strain_DSM_19850",
+                        "Eubacterium._hallii_strain_ATCC_27751",
+                        "Bacteroides_dorei_strain_175",
+                        "Others")
+
+ggplot(rel.abund_regroup,
+       aes(x= sample, 
+           y= rel_abund2, 
+           fill=otu2))+
+  geom_bar(position = "stack", stat = "identity") +
+  # remove x-axis labels 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  # remove axis titles
+  theme(axis.title = element_blank()) +
+  # y-axis percentage 
+  scale_y_continuous(labels = percent) + 
+  # legend with shorten taxa names, below figure 
+  scale_fill_brewer(palette = "Set3",
+                    labels = top11_taxa_shorten) + 
+  # color palette, Set3 
+  # remove samples with missing data 
+  theme(plot.margin = margin(1,1,0.5,0.5, "cm")) +
+  # deal with legends 
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 4, byrow = T)) +
+  theme(legend.key.size = unit(0.3, "cm"),
+        legend.text = element_text(size = 7),
+        legend.title = element_blank())
+  
+
+
+  
 ```
 
 ### Step 11. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()`
