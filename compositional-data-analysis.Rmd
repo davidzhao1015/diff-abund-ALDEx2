@@ -136,7 +136,7 @@ microbiome data includes: 
 
 ## R workflow
 
-```{r flow diagram, echo=FALSE}
+```{r flow diagram, echo=FALSE, fig.dim=c(8,6)}
 
 # flow diagram instruction https://epirhandbook.com/en/diagrams-and-charts.html 
 
@@ -853,7 +853,7 @@ Here, illustrate two additional plots about effect size: 1. plot the
 effect size versus the p-value 2. a volcano plot to show difference
 between groups versus p-values
 
-```{r effect size plot, fig.dim=c(8,6)}
+```{r effect size plot2, fig.dim=c(8,6)}
 
 par(mfrow = c(1,2)) 
 plot(vdr_all$effect,
