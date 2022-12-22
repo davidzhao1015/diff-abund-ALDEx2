@@ -502,7 +502,7 @@ and
 [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram).
 
 
-```{r dendrogram base R, collapse=TRUE, out.width=300px, out.height=260px}
+```{r dendrogram base R, collapse=TRUE, out.width="900px", out.height="500px"}
 
 # create dendrogram object 
 dend_ward.d2 <- hc_ward.d2 %>% 
