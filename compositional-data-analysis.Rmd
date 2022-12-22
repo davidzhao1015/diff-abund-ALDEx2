@@ -745,6 +745,8 @@ It has 3 arguments: 
 
 vdr_effect <- aldex.effect(vdr, include.sample.summary = FALSE, verbose = FALSE)
 
+vdr_effect
+
 ```
 
 The function, `aldex.effect()` returns all values including, 
@@ -776,7 +778,6 @@ sig_by_both <- vdr_all %>%
 
 sig_by_both 
 
-
 ```
 
 Any taxa remain significant when p-values are adjusted for multiple
@@ -801,7 +802,7 @@ closely, but not merely highly correlated.
 the degree of agreement of measures between median log2
 between-condition difference and median log2 relative abundance.
 
-```{r MA plot}
+```{r MA plot, fig.dim=c(8,6)}
 
 aldex.plot(vdr_all, 
            type = "MA", # specifies plot type to be produced 
@@ -819,7 +820,7 @@ as a measure of the mean ratio of the difference between groups
 (diff.btw) and the maximum difference within groups (diff.win or
 variance).
 
-```{r}
+```{r effect size plot, fig.dim=c(8,6)}
 
 par(mfrow = c(1,2)) 
 aldex.plot(vdr_all, 
@@ -852,7 +853,7 @@ Here, illustrate two additional plots about effect size: 1. plot the
 effect size versus the p-value 2. a volcano plot to show difference
 between groups versus p-values
 
-```{r effect size plot}
+```{r effect size plot, fig.dim=c(8,6)}
 
 par(mfrow = c(1,2)) 
 plot(vdr_all$effect,
