@@ -686,21 +686,21 @@ na_t_raw_otu3 <- na_t_raw_otu2 %>%
   spread(key = "sample", value = "reads") %>% 
   column_to_rownames("otu") 
 
-ncol(na_t_raw_otu3) # 142 samples 
-
 # input count data to ALDEX2 
 aldex_raw_count <- na_t_raw_otu3 
-
 
 ```
 
 Generate instances of the centered log-ratio transformed values using
 the function `aldex.clr()`
 
-The function `aldex.clr()` has three input: count table, number of
-Monte-Carlo instances, and level of verbosity (TRUE or FALSE). The
-package authors recommend 128 or more `mc.samples` for the t-test, 1000
-for a rigorous effect size calculation, and at least 16 for ANOVA.
+The function `aldex.clr()` has three input: \ 
+
+- count table
+- number of Monte-Carlo instances
+- level of verbosity (TRUE or FALSE) 
+
+The package authors recommend 128 or more `mc.samples` for the t-test, 1000 for a rigorous effect size calculation, and at least 16 for ANOVA.
 
 ```{r aldex clr}
 
@@ -713,11 +713,14 @@ vdr <- aldex.clr(aldex_raw_count,
 
 Perform the Welch's and Wilcoxon rank sum test using `aldex.ttest()`
 
-The function `aldex.ttest()` returns the values of `we.ep` (expected
-p-value of Welch's t test), `we.eBH` (expected Benjamini-Hochberg
-corrected p-value of Welch's t test), `wi.ep` (expected p-value of
-Wilcoxon rank sum test), and `wi.eBH` (expected Benjamini-Hochberg
-corrected p-value of Wilcoxon rank sum test)
+The function `aldex.ttest()` returns the values: 
+
+-   `we.ep` (expected p-value of Welch's t test)
+-   `we.eBH` (expected Benjamini-Hochberg corrected p-value of Welch's t
+    test)
+-   `wi.ep` (expected p-value of Wilcoxon rank sum test)
+-   `wi.eBH` (expected Benjamini-Hochberg corrected p-value of Wilcoxon
+    rank sum test)
 
 ```{r}
 
@@ -746,24 +749,19 @@ vdr_effect <- aldex.effect(vdr, include.sample.summary = FALSE, verbose = FALSE)
 
 The function, `aldex.effect()` returns all values including, 
 
--   rab.all median clr value for all samples inthe feature
--   rab.win.VdrFecal median clr value for the VdrFecal group of samples
--   rba.win.VdrCecal median clr value for the VdrCecal groups of samples
--   dif.btw median difference in clr values beween VdrFecal and VdrCecal
-    groups
--   dif.win median of the largest difference in clr values within
-    VdrFecal and VdrCecal groups
--   effect median effect size: diff.btw/max(diff.win) for all instances
--   overlap proportion of effect size that overlaps 0: it is overlap
-    between the Bayesian distribuiotn of rous VdrFecal and VdrCecal
-
-Merge all outputs into one single object and make a data frame for
-result viewing and downstream analysis
+-   `rab.all` median clr value for all samples in the feature
+-   `rab.win.Lean` median clr value for the `Lean` group of samples
+-   `rba.win.Obese` median clr value for the `Obese` groups of samples
+-  ` dif.btw` median difference in clr values between `Lean` and `Obese` groups
+-   `dif.win` median of the largest difference in clr values within `Lean` and `Obese` groups
+-   `effect` median effect size: `diff.btw/max(diff.win)` for all instances
+-   `overlap` proportion of effect size that overlaps 0: it is overlap between the Bayesian distribution of  `Lean` and `Obese` 
 
 ```{r}
 
-vdr_all <- data.frame(vdr_t, vdr_effect)  
+# Merge all outputs into one single object and make a data frame for result viewing and downstream analysis 
 
+vdr_all <- data.frame(vdr_t, vdr_effect)  
 
 head(vdr_all)
 ```
@@ -799,7 +797,7 @@ The point underlying the method is that any two methods designing to
 measure the same property or parameter should have agree sufficiently
 closely, but not merely highly correlated.
 
-ALDEX2 provides a Bland-Altman (MA) style plot to graphically compare
+`ALDEX2` provides a Bland-Altman (MA) style plot to graphically compare
 the degree of agreement of measures between median log2
 between-condition difference and median log2 relative abundance.
 
@@ -844,12 +842,9 @@ aldex.plot(vdr_all,
 
 ```
 
-In general, p-value is less robust than effect size. Thus, researchers
-prefer to report effect size more often than the p-value. If sample size
-is sufficiently large, an effect size of 0.5 or greater is considered
-more likely corresponding to biological relevance.
+In general, p-value is less robust than effect size. Thus, researchers prefer to report effect size more often than the p-value. **If sample size is sufficiently large, an effect size of 0.5 or greater is considered more likely corresponding to biological relevance**.
 
-In ALDEX2, an effect size cutoff of 1.5 - 2 and an overlap cutoff of
+In `ALDEX2`, an effect size cutoff of 1.5 - 2 and an overlap cutoff of
 0.01 is considered as more appropriate to identify differential taxa of
 interest.
 
