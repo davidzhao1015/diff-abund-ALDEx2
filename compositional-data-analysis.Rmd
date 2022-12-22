@@ -650,9 +650,6 @@ ggplot(rel.abund_regroup,
   theme(plot.caption = element_text(hjust = 0))
   
   
-
-
-  
 ```
 
 ### Step 11. Perform the Welch's t and Wilcoxon Rank Sum Test using `aldex.ttest()`
@@ -722,9 +719,6 @@ corrected p-value of Welch's t test), `wi.ep` (expected p-value of
 Wilcoxon rank sum test), and `wi.eBH` (expected Benjamini-Hochberg
 corrected p-value of Wilcoxon rank sum test)
 
-The function, `aldex.glm()` is alternative to `aldex.ttest()` which
-implement Kruskal-Wallis test. However, it is slow.
-
 ```{r}
 
 vdr_t <- aldex.ttest(vdr, paired.test=FALSE, hist.plot=FALSE, verbose=FALSE)   
@@ -737,9 +731,12 @@ Estimate effect size using the function `aldex.effect()`
 The `aldex.effect()` function estimates effect size and the within and
 between condition values in the case of two conditions.
 
-It has 3 arguments: - the aldex object from aldex.clr() - a flag
-indicating whether or not to include values for all samples are used as
-the denominator - the level of verbosity
+It has 3 arguments: 
+
+-   the aldex object from aldex.clr()
+-   a flag indicating whether or not to include values for all samples
+    are used as the denominator
+-   the level of verbosity
 
 ```{r effect size}
 
@@ -747,15 +744,18 @@ vdr_effect <- aldex.effect(vdr, include.sample.summary = FALSE, verbose = FALSE)
 
 ```
 
-The function, `aldex.effect()` returns all values including, - rab.all
-median clr value for all samples inthe feature - rab.win.VdrFecal median
-clr value for the VdrFecal group of samples - rba.win.VdrCecal median
-clr value for the VdrCecal groups of samples - dif.btw median difference
-in clr values beween VdrFecal and VdrCecal groups - dif.win median of
-the largest difference in clr values within VdrFecal and VdrCecal
-groups - effect median effect size: diff.btw/max(diff.win) for all
-instances - overlap proportion of effect size that overlaps 0: it is
-overlap between the Bayesian distribuiotn of rous VdrFecal and VdrCecal
+The function, `aldex.effect()` returns all values including, 
+
+-   rab.all median clr value for all samples inthe feature
+-   rab.win.VdrFecal median clr value for the VdrFecal group of samples
+-   rba.win.VdrCecal median clr value for the VdrCecal groups of samples
+-   dif.btw median difference in clr values beween VdrFecal and VdrCecal
+    groups
+-   dif.win median of the largest difference in clr values within
+    VdrFecal and VdrCecal groups
+-   effect median effect size: diff.btw/max(diff.win) for all instances
+-   overlap proportion of effect size that overlaps 0: it is overlap
+    between the Bayesian distribuiotn of rous VdrFecal and VdrCecal
 
 Merge all outputs into one single object and make a data frame for
 result viewing and downstream analysis
