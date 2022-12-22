@@ -624,7 +624,7 @@ ggplot(rel.abund_regroup,
        aes(x= sample, 
            y= rel_abund2, 
            fill=otu2))+
-  geom_bar(position = "stack", stat = "identity") +
+  geom_bar(position = "stack", stat = "identity", color = NA) +
   # remove x-axis labels 
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
@@ -643,7 +643,7 @@ ggplot(rel.abund_regroup,
   guides(fill = guide_legend(nrow = 4, byrow = T)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.text = element_text(size = 7),
-        legend.title = element_blank())
+        legend.title = element_blank()) 
   
 
 
