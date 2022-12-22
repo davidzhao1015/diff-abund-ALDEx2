@@ -571,7 +571,7 @@ The website,
 [rdocumentation](https://www.rdocumentation.org/packages/compositions/versions/2.0-4/topics/acomp)
 provides a code example of running `acomp()` function.
 
-```{r}
+```{r bar plot, fig.dim=c(8,6)}
 # reorder according to clustering structure 
 pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc_ward.d2$order]  # the input data is OTU count data after 0 replacement
 
