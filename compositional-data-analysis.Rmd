@@ -502,7 +502,7 @@ and
 [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram).
 
 
-```{r dendrogram base R, collapse=TRUE, out.width="900px", out.height="500px"}
+```{r dendrogram base R, collapse=TRUE, fig.dim=c(8,6)}
 
 # create dendrogram object 
 dend_ward.d2 <- hc_ward.d2 %>% 
@@ -561,10 +561,8 @@ legend("topright", legend = c('obese', 'lean', 'NA'),
 ### Step 10. Compositional bar plot
 
 ```{r}
-
 # reorder according to clustering structure 
 pcount_otu_fl_reorder <- pcount_otu_fl[ ,hc_ward.d2$order]
-
 
 
 # bar plot 
