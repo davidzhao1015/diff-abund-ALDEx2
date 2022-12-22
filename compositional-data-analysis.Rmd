@@ -643,7 +643,12 @@ ggplot(rel.abund_regroup,
   guides(fill = guide_legend(nrow = 4, byrow = T)) +
   theme(legend.key.size = unit(0.3, "cm"),
         legend.text = element_text(size = 7),
-        legend.title = element_blank()) 
+        legend.title = element_blank()) +
+  # title, caption 
+  labs(title = "Composition of gut microbiota throughout all samples",
+       caption = "Display top 11 taxa while combining all other taxa into a single group,others.") +
+  theme(plot.caption = element_text(hjust = 0))
+  
   
 
 
