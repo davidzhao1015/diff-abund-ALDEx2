@@ -501,7 +501,8 @@ alternative, following the instructions on
 and
 [stackoverflow](https://stackoverflow.com/questions/49088627/how-to-label-colored-bars-in-a-dendrogram).
 
-```{r dendrogram base R, collapse=TRUE, fig.height=30, fig.width=40}
+
+```{r dendrogram base R, collapse=TRUE, out.width=300px, out.height=260px}
 
 # create dendrogram object 
 dend_ward.d2 <- hc_ward.d2 %>% 
@@ -542,7 +543,7 @@ dend_ward.d2 %>%
 
 # set up the color bar 
 node_col2 <- node_col_df %>% pull(node_col) 
-colored_bars(colors = node_col2, dend = dend_ward.d2, y_shift = -1)   
+colored_bars(colors = node_col2, dend = dend_ward.d2, y_shift = -5)   
 
 # add legend manually
 legend("topright", legend = c('obese', 'lean', 'NA'), 
